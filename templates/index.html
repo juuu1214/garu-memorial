@@ -3,20 +3,77 @@
 
 <div class="container-narrow">
   <div class="topbar">
-    <img class="logo-green" src="/static/logo.svg" alt="logo">
+
   </div>
 
-  <!-- ============ intro 영역 전체 (하루 1회 메시지, 꼬리 중앙, 점프 방지) ============ -->
+  <!-- ============ intro 영역 전체 (잎 고정 + 중앙정렬) ============ -->
   <style>
     :root { --avatar-size: 210px; }
     @media (max-width: 520px) { :root { --avatar-size: 180px; } }
 
+    .intro-section {
+      position: relative;
+      background-image: url('/static/waving-leaves.gif');
+      background-size: cover;
+      background-position: center;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 520px;
+    }
+
+    /* ✅ 잎을 배경처럼 고정 */
+    .leaf-top,
+    .leaf-bot {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    /* ⬆️ top-right로 수정 */
+    .leaf-top {
+      top: -2vw;
+      right: -2vw;   /* ← 여기! */
+      left: auto;    /* ← 안전하게 left 해제 */
+      width: 28vw;
+      height: auto;
+      transform: none;
+    }
+
+    .leaf-bot {
+      bottom: -3vw;
+      right: -2vw;
+      width: 28vw;
+      height: auto;
+      transform: none;
+    }
+
+    @media (max-width: 520px) {
+      .leaf-top  { width: 34vw; top: -4vw; right: -4vw; left: auto; }
+      .leaf-bot  { width: 42vw; bottom: -5vw; right: -4vw; }
+    }
+
+    /* ✅ 중앙 콘텐츠 래퍼 */
+    .intro-center {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 520px;
+      padding: 56px 16px 48px;
+      z-index: 2;
+    }
+
+    /* 🐾 아바타 + 말풍선 */
     .avatar-wrap {
       position: relative;
       display: inline-block;
       width: var(--avatar-size);
       height: var(--avatar-size);
-      margin: 24px 0 16px;
+      margin: 12px 0 12px;
     }
 
     .avatar-circle {
@@ -24,92 +81,132 @@
       height: var(--avatar-size);
       border-radius: 50%;
       overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 22px rgba(0,0,0,.15);
-      border: 3px solid rgba(255,255,255,.95);
-      background:#fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .15);
+      border: 3px solid rgba(255, 255, 255, .95);
+      background: #fff;
     }
-    .avatar-circle img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
     .speech-bubble {
       position: absolute;
       bottom: calc(100% + 20px);
-      left: 50%; transform: translateX(-50%);
-      background:#fff; color:#0f1a14;
-      font-size:15px; line-height:1.6;
-      padding:10px 16px; border-radius:14px;
-      box-shadow:0 6px 20px rgba(0,0,0,.12);
-      border:1px solid rgba(0,0,0,.08);
-      display:inline-block; overflow:visible; z-index:3;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      color: #0f1a14;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 10px 16px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+      border: 1px solid rgba(0, 0, 0, .08);
+      display: inline-flex;              /* ✅ inline-flex 로 변경 */
+      align-items: center;               /* ✅ 수직 가운데 정렬 */
+      justify-content: center;           /* ✅ 가로 가운데 정렬 */
+      text-align: center;                /* ✅ 텍스트도 중앙정렬 */
+      z-index: 3;
       animation: bubble-fade 180ms ease-out;
-    }
-    .speech-bubble .bubble-text {
-      display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      max-width: 90vw; text-align:center; vertical-align:top;
-    }
-    .speech-bubble::before, .speech-bubble::after {
-      content:""; position:absolute; left:50%; transform:translateX(-50%);
-      width:0; height:0; border-style:solid;
-    }
-    .speech-bubble::before {
-      bottom:-11px; border-width:11px 10px 0 10px;
-      border-color: rgba(0,0,0,.08) transparent transparent transparent;
-    }
-    .speech-bubble::after {
-      bottom:-10px; border-width:10px 9px 0 9px;
-      border-color:#fff transparent transparent transparent;
-    }
-    @keyframes bubble-fade { from{opacity:0} to{opacity:1} }
+}
 
-    @media (max-width: 520px){
-      .speech-bubble { bottom: calc(100% + 14px); font-size:14px; padding:8px 12px; }
+    .speech-bubble .bubble-text {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .speech-bubble::before,
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .speech-bubble::before {
+      bottom: -11px;
+      border-width: 11px 10px 0 10px;
+      border-color: rgba(0, 0, 0, .08) transparent transparent transparent;
+    }
+
+    .speech-bubble::after {
+      bottom: -10px;
+      border-width: 10px 9px 0 9px;
+      border-color: #fff transparent transparent transparent;
+    }
+
+    @keyframes bubble-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .intro-name { font-weight: 800; font-size: 20px; margin-top: 8px; }
+    .intro-date { opacity: .8; margin-top: 4px; }
+
+    /* 버튼 그룹 */
+    .intro-cta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 20px 0 0;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 520px) {
+      .intro-section,
+      .intro-center { min-height: 480px; }
+
+      .speech-bubble {
+        bottom: calc(100% + 14px);
+        font-size: 14px;
+        padding: 8px 12px;
+      }
       .speech-bubble .bubble-text { max-width: 85vw; }
     }
-
-    /* 인트로 버튼 그룹 */
-    .intro-cta {
-      display:flex; gap:12px; justify-content:center; margin:22px 0 8px;
-      flex-wrap:wrap;
-    }
-    .cta-btn {
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:12px 18px; border-radius:999px; font-size:15px; font-weight:600;
-      border:1px solid #0d4221; color:#0d4221; background:#fff;
-      text-decoration:none; transition: transform .06s ease, box-shadow .2s;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
-    }
-    .cta-btn.primary {
-      background:#0d4221; color:#fff; border-color:#0d4221;
-    }
-    .cta-btn:hover { transform: translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.08); }
   </style>
 
-  <div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
+  <div class="intro-section">
+    <!-- ✅ 배경 잎 이미지 (top=오른쪽, bottom=오른쪽) -->
     <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
     <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
 
-    <!-- 🐾 아바타 + 말풍선 -->
-    <div class="avatar-wrap">
-      <div class="speech-bubble" id="garuBubble">
-        <span class="bubble-text">오늘도 나 생각했지? ☁️</span>
+    <!-- ✅ 중앙 정렬 콘텐츠 -->
+    <div class="intro-center">
+      <div class="avatar-wrap">
+        <div class="speech-bubble" id="garuBubble">
+          <span class="bubble-text">오늘도 나 생각했지? ☁️</span>
+        </div>
+        <div class="avatar-circle">
+          <img src="/static/garu-main.jpg" alt="가루 프로필 사진" width="210" height="210" />
+        </div>
       </div>
-      <div class="avatar-circle">
-        <img src="/static/garu-main.jpg" alt="가루 프로필 사진" width="210" height="210" />
+
+      <div class="intro-name">가루 프랭키 아이반호 멍키</div>
+      <div class="intro-date">2025년 09월 22일</div>
+
+      <div class="intro-cta">
+        <a class="btn-chip" href="{{ url_for('gallery') }}">📸 사진첩</a>
+        <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록</a>
       </div>
-    </div>
-
-    <div class="intro-name">가루 프랭키 아이반호 멍키</div>
-    <div class="intro-date-wrap"><div class="intro-date">2025년 09월 22일</div></div>
-
-    <!-- ✅ 인트로에서 이동 버튼 -->
-    <div class="intro-cta">
-      <a class="cta-btn primary" href="{{ url_for('gallery') }}">📸 사진첩</a>
-      <a class="cta-btn" href="{{ url_for('guest_list') }}">📝 방명록</a>
     </div>
   </div>
 
   <script>
-    /* 💬 랜덤 메시지 (하루 1회 변경) */
+    /* 💬 하루 1회 랜덤 메시지 */
     const garuMessages = [
       "오늘도 나 생각했지? ☁️",
       "하늘에서도 너 보고 있다멍 🐾",
@@ -123,12 +220,11 @@
     const bubbleText = document.querySelector("#garuBubble .bubble-text");
     if (bubbleText) {
       const today = new Date();
-      const dayKey = today.getFullYear()*10000 + (today.getMonth()+1)*100 + today.getDate();
+      const dayKey = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
       const idx = dayKey % garuMessages.length;
       bubbleText.textContent = garuMessages[idx];
     }
   </script>
-  <!-- ============ /intro 영역 전체 ============ -->
-
 </div>
+
 {% endblock %}

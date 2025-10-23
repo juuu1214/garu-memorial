@@ -1,33 +1,80 @@
-/* 기본 레이아웃 */
-.container-narrow { max-width: 480px; margin: 20px auto 120px; }
+/* ===== 기본 레이아웃 ===== */
+html, body { height: 100%; margin: 0; }
+
+.container-narrow {
+  max-width: 480px;
+  margin: 20px auto 120px;
+  /* 🧩 iPhone notch, 갤럭시 상단바 대비 */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+}
+
 .topbar { display:flex; align-items:center; justify-content:space-between; padding: 0 20px; }
 .logo-green { height: 40px; }
 
-/* 인트로 */
-.intro-section {
-  min-height: 700px;
-  display:flex; flex-direction:column; align-items:center;
-  padding: 35px 12px 40px;
-  background-size: contain; background-repeat: no-repeat;
-  position: relative; border-radius: 16px;
+@media (max-width: 520px){
+  /* 모바일에선 좌우 여백 제거해서 진짜 꽉 차게 */
+  .container-narrow { max-width: none; margin: 0 auto 80px; padding: 0; }
 }
-.leaf-top { position:absolute; right:0; top:0; width:40%; }
-.leaf-bot { position:absolute; left:0; bottom:0; width:150px; }
+
+/* ===== 인트로 ===== */
+/* 화면을 가득 채우고 중앙 정렬 (배경은 그대로) */
+.intro-section {
+  min-height: 100vh;           /* 👈 한 화면 꽉 채움 */
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding: 35px 12px 40px;
+  background-size: contain; background-repeat: no-repeat;  /* 기존 유지 */
+  position: relative; border-radius: 16px;
+  text-align: center;
+  overflow: hidden;            /* 잎 이미지가 튀어나와도 스크롤 안생기게 */
+}
+
+/* 잎: 배경 레이어 + 공통 속성 */
+.leaf-top,
+.leaf-bot {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* 오른쪽 위 잎 — 아래쪽보다 약 2배 크게 */
+.leaf-top {
+  right: 0;
+  top: 0;
+  width: clamp(600px, 90vw, 820px);  /* ✅ 기존보다 약 2배 확대 */
+}
+
+/* 왼쪽 아래 잎 */
+.leaf-bot {
+  left: 0;
+  bottom: 0;
+  width: clamp(300px, 45vw, 420px);  /* 기존 유지 */
+}
+
+/* 잎을 제외한 나머지 요소는 위 레이어에서 중앙 정렬 */
+.intro-section > :not(.leaf-top):not(.leaf-bot) {
+  position: relative;
+  z-index: 1;
+}
+
 .intro-eyebrow { font-size:12px; font-weight:500; }
 .intro-subtitle { margin-top:10px; font-size:16px; font-weight:500; text-align:center; }
+
+/* (예전 창문형 프레임 – 지금은 안쓰면 무시됨) */
 .portrait-frame {
   width:247px; height:339px; margin-top:34px;
-  border:1.5px solid #69B77A; /* green-main 비슷 */
+  border:1.5px solid #69B77A;
   border-top-left-radius:166px; border-top-right-radius:166px;
   border-bottom-left-radius:0; border-bottom-right-radius:0;
   background-size: cover; background-position: center; background-repeat:no-repeat;
 }
-.intro-name { margin-top:24px; font-size:37px; font-weight:800; color:#000; text-align:center; }
-.intro-date-wrap { margin-top:46px; text-align:center; }
-.intro-date { font-size:20px; font-weight:800; color:#6b7280; }
+
+.intro-name { margin-top:24px; font-size:30px; font-weight:800; color:#000; text-align:center; }
+.intro-date-wrap { margin-top:22px; text-align:center; }
+.intro-date { font-size:15px; font-weight:800; color:#000; }
 .intro-desc { font-size:18px; font-weight:600; color:#6b7280; }
 
-/* 버튼/텍스트 유틸 */
+/* ===== 버튼/텍스트 유틸 ===== */
 .mx20 { margin: 0 20px; }
 .center { text-align:center; }
 .mt24 { margin-top:24px; }
@@ -45,11 +92,11 @@
 }
 .btn-green { background:#2f9e44; color:#fff; border:none; }
 
-/* 이름/나이 */
+/* ===== 이름/나이 ===== */
 .name-xl { font-size:31px; font-weight:800; }
 .age { font-size:20px; }
 
-/* 슬라이더 공통 */
+/* ===== 슬라이더 공통 ===== */
 .slider-block { position:relative; margin-top:22px; }
 .slick-page { position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:12px; color:#555; }
 .slick-list { overflow:hidden; border-radius:12px; }
@@ -57,13 +104,19 @@
 .slick-slide { width: 440px; flex: 0 0 440px; padding: 0; }
 .slide-img {
   width: 100%;
-  aspect-ratio: 3 / 4;   /* 3:4 비율 유지 */
-  object-fit: cover;      /* 이미지가 프레임을 가득 채우도록 */
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
   border-radius: 12px;
   display: block;
 }
 
-/* === 전역 버튼 스타일 === */
+.gb-sub {
+  font-size: 14px;
+  font-weight: normal;
+  color: #666;
+}
+
+/* ===== 전역 버튼 스타일 ===== */
 .btn-chip {
   display: inline-flex;
   align-items: center;
@@ -77,13 +130,8 @@
   color: #0f1a14;
   transition: all 0.2s ease;
 }
-.btn-chip:hover {
-  background: #cfd8d3;
-  color: #fff;
-}
-.btn-chip:active {
-  transform: translateY(1px);
-}
+.btn-chip:hover { background: #cfd8d3; color: #fff; }
+.btn-chip:active { transform: translateY(1px); }
 
 /* 슬라이드 네비 버튼 */
 .btn-slick {
@@ -99,39 +147,28 @@
   color: #333;
   font-size: 22px;
   font-weight: 600;
-
-  /* 🧭 아이콘 정중앙 맞춤 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.25s ease;
   z-index: 5;
 }
-
-.btn-slick:hover {
-  background: rgba(255, 255, 255, 0.9);
-  color: #000;
-  transform: translateY(-50%) scale(1.05);
-}
-
+.btn-slick:hover { background: rgba(255, 255, 255, 0.9); color: #000; transform: translateY(-50%) scale(1.05); }
 .btn-slick.left { left: 8px; }
 .btn-slick.right { right: 8px; }
 
-/* 갤러리 1:1 */
+/* ===== 갤러리 1:1 ===== */
 .ig-item { aspect-ratio: 1 / 1; }
 .ig-item img { object-fit: cover; }
 
-/* 방명록 헤더 배경 */
+/* ===== 방명록 헤더 배경 ===== */
 .guestbook-hero {
   height:100px; width:100%;
   background-size:cover; background-repeat:no-repeat; background-position:center;
   border-radius:12px; margin:90px 0 24px;
 }
 
-/* 방명록 */
+/* ===== 방명록 ===== */
 .gb-eyebrow { font-size:16px; font-weight:600; }
 .gb-title { font-size:20px; font-weight:800; }
 .gb-for-row {
@@ -159,4 +196,3 @@
   display:inline-block; background:#2f9e44; color:#fff; padding:12px 18px;
   border-radius:10px; text-decoration:none;
 }
-

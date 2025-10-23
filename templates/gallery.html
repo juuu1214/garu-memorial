@@ -2,9 +2,7 @@
 {% block content %}
 
 <div class="container-narrow">
-  <div class="topbar">
-    <img class="logo-green" src="/static/logo.svg" alt="logo">
-  </div>
+  <div class="mx20">
 
   <style>
     .ig-wrap { padding: 0; margin: 0; }
@@ -68,8 +66,7 @@
           <a class="btn-chip" href="{{ url_for('gallery_upload') }}">📤 사진 올리기</a>
           <a class="btn-chip" href="{{ url_for('admin_logout') }}">🔒 로그아웃</a>
         {% else %}
-          <a class="btn-chip" href="{{ url_for('admin_login', next=url_for('gallery')) }}">🔓 관리자 로그인</a>
-          <a class="btn-chip" href="{{ url_for('index') }}">🐶 메인</a>
+          <a class="btn-chip" href="{{ url_for('index') }}">🏠 메인</a>
           <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록</a>
         {% endif %}
         

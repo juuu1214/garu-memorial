@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: garu-memorial
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    autoDeploy: true
+envVars:
+  - key: FLASK_ENV
+    value: production
+  - key: UPLOAD_DIR
+    value: uploads           # (로컬 임시 사용 가능)
+  - key: SUPABASE_URL
+    sync: false              # Render 대시보드에서 값 넣기
+  - key: SUPABASE_ANON_KEY
+    sync: false              # Render 대시보드에서 값 넣기
+  - key: SUPABASE_BUCKET
+    value: garu              # 위에서 만든 버킷명
+  - key: SUPABASE_PUBLIC    # public 버킷이면 true
+    value: "true"
+
+        
