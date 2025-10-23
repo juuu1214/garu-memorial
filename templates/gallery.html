@@ -7,7 +7,6 @@
   </div>
 
   <style>
-    /* 기본 레이아웃 */
     .ig-wrap { padding: 0; margin: 0; }
     .ig-head {
       display:flex; align-items:center; justify-content:space-between;
@@ -19,30 +18,36 @@
       padding:8px 12px; border:1px solid #cfd8d3; border-radius:999px;
       font-size:13px; background:#fff; text-decoration:none; color:#0f1a14;
     }
+    .ig-actions { display:flex; gap:8px; flex-wrap:wrap; }
 
-    /* 🧩 무간격 1:1 정사각형 그리드 */
+    /* 무간격 1:1 그리드 */
     .ig-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(33.333%, 1fr));
-      gap: 0;                 /* ✅ 간격 완전 제거 */
-      margin: 0;
-      padding: 0;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
     }
-
     .ig-item {
       position: relative;
       width: 100%;
-      aspect-ratio: 1 / 1;   /* ✅ 정사각형 유지 */
+      aspect-ratio: 1 / 1;
       overflow: hidden;
-      background: #000;       /* 로딩 전 빈 공간 대비 */
+      background: #000;
     }
-
     .ig-item img {
       width: 100%;
       height: 100%;
-      object-fit: cover;     /* ✅ 사진이 꽉 차도록 */
+      object-fit: cover;
       display: block;
     }
+
+    /* 삭제 버튼 (관리자 전용) */
+    .ig-del {
+      position:absolute; top:8px; right:8px;
+      background: rgba(0,0,0,0.5); color:#fff; border:0;
+      border-radius: 999px; padding: 6px 10px; font-size:12px;
+      cursor:pointer;
+    }
+    .ig-del:hover { background: rgba(0,0,0,0.7); }
 
     .ig-empty {
       text-align:center; color:#486055;
@@ -51,33 +56,49 @@
     }
 
     @media (max-width: 520px) {
-      .ig-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
+      .ig-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 
   <div class="ig-wrap">
     <div class="ig-head">
-      <div class="ig-title">추억의 사진들</div>
+      <div class="ig-title">가루스타그램</div>
       <div class="ig-actions">
-        <a class="btn-chip" href="{{ url_for('gallery_upload') }}">📤 사진 올리기</a>
-        <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록으로</a>
+        {% if is_admin %}
+          <a class="btn-chip" href="{{ url_for('gallery_upload') }}">📤 사진 올리기</a>
+          <a class="btn-chip" href="{{ url_for('admin_logout') }}">🔒 로그아웃</a>
+        {% else %}
+          <a class="btn-chip" href="{{ url_for('admin_login', next=url_for('gallery')) }}">🔓 관리자 로그인</a>
+          <a class="btn-chip" href="{{ url_for('index') }}">🐶 메인</a>
+          <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록</a>
+        {% endif %}
+        
+
       </div>
     </div>
 
     {% if images and images|length > 0 %}
       <div class="ig-grid">
-        {% for src in images %}
+        {% for img in images %}
           <div class="ig-item">
-            <img src="{{ src }}" alt="추억 사진" loading="lazy">
+            <img src="{{ img.url }}" alt="추억 사진" loading="lazy">
+            {% if is_admin and img.origin == 'static/uploads' %}
+              <form method="POST" action="{{ url_for('gallery_delete') }}">
+                <input type="hidden" name="filename" value="{{ img.name }}">
+                <button type="submit" class="ig-del" title="삭제">✕</button>
+              </form>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
     {% else %}
       <div class="ig-empty">
         아직 사진이 없어요.<br>
-        <a class="btn-chip mt8" href="{{ url_for('gallery_upload') }}">📤 첫 사진 올리기</a>
+        {% if is_admin %}
+          <a class="btn-chip mt8" href="{{ url_for('gallery_upload') }}">📤 첫 사진 올리기</a>
+        {% else %}
+          <a class="btn-chip mt8" href="{{ url_for('admin_login', next=url_for('gallery')) }}">🔓 관리자 로그인</a>
+        {% endif %}
       </div>
     {% endif %}
   </div>

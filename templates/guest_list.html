@@ -1,30 +1,77 @@
 {% extends "_base.html" %}
 {% block content %}
-<div class="container-narrow center">
-  <div class="topbar">
-    <a href="/" class="btn btn-ghost" aria-label="back">←</a>
-    <div class="title-green">기억의 숲, 방명록</div>
-  </div>
 
-  <p class="subtitle-gray">소중한 마음들이 모여있는 곳입니다.</p>
+<div class="container-narrow">
+  <div class="mx20">
 
-  <div class="list-head">
-    <span class="text-[14px] font-semibold">전체 {{ total_count }}건</span>
-    <a href="/guest-list#create" class="btn-primary-obituary">방명록 작성</a>
-  </div>
+    <style>
+      .gb-head {
+        display:flex; align-items:center; justify-content:space-between;
+        gap:10px; margin:18px 0 10px;
+      }
+      .gb-title {font-weight:700; font-size:18px;}
+      .gb-title small {font-weight:400; opacity:.7; margin-left:6px;}
+      .gb-actions {display:flex; gap:8px; flex-wrap:wrap;}
 
-  <div class="guestbook-list mt15">
-    {% for msg in guestbook %}
-      <div class="gb-card">
-        <div class="gb-card-head">
-          <span>From. <span class="from-name">{{ msg.name }}</span></span>
-          <span class="date">{{ msg.date }}</span>
-        </div>
-        <div class="gb-card-body">{{ msg.message }}</div>
+      /* ✅ 갤러리와 동일한 버튼 스타일 */
+      .btn-chip {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 12px; border:1px solid #cfd8d3; border-radius:999px;
+      font-size:13px; background:#fff; text-decoration:none; color:#0f1a14;
+      }
+      .btn-chip:hover { background:#cfd8d3; color:#fff; }
+      .btn-chip:active { transform:translateY(1px); }
+
+      .divider { height:1px; background:#e7ece9; margin:12px 0 16px; }
+
+      /* 카드 리스트 */
+      .gb-list { display:flex; flex-direction:column; gap:12px; }
+      .gb-card {
+        border:1px solid #e0e6e3; border-radius:12px;
+        padding:12px; background:#fff;
+      }
+      .gb-card-head {
+        display:flex; justify-content:space-between; gap:8px; font-size:14px;
+      }
+      /* ✅ 이름색 통일 (회색 → 검정) */
+      .gb-card-head b,
+      .gb-card-head .from-name {
+        color:#000; font-weight:600;
+      }
+      .gb-card-head .date { opacity:.7; }
+      .gb-card-body {
+        white-space: pre-line;
+        margin-top:8px; font-size:15px;
+      }
+    </style>
+
+    <div class="gb-head">
+      <div class="gb-title">
+        방명록 <small>(총 {{ total_count }}개)</small>
       </div>
-    {% endfor %}
+      <div class="gb-actions">
+        <a class="btn-chip" href="{{ url_for('guest_create') }}">📝 방명록 작성</a>
+        <a class="btn-chip" href="{{ url_for('index') }}">🏠 메인으로</a>
+      </div>
+    </div>
 
-    {% include "_legacy.html" %}
+    <div class="divider"></div>
+
+    <div class="gb-list">
+      {% for msg in guestbook %}
+        <div class="gb-card">
+          <div class="gb-card-head">
+            <span>From. <b>{{ msg.name }}</b></span>
+            <span class="date">{{ msg.date }}</span>
+          </div>
+          <div class="gb-card-body">{{ msg.message | trim }}</div>
+        </div>
+      {% endfor %}
+
+      {% include "_legacy.html" %}
+    </div>
+
   </div>
 </div>
+
 {% endblock %}

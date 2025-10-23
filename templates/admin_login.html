@@ -1,0 +1,32 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<div class="container-narrow">
+  <div class="topbar">
+    <img class="logo-green" src="/static/logo.svg" alt="logo">
+  </div>
+
+  <style>
+    .login-wrap { max-width:420px; margin:0 auto; padding:20px; }
+    .login-title { font-size:18px; font-weight:700; margin-bottom:12px; }
+    .login-box { border:1px solid #cfd8d3; border-radius:12px; padding:20px; background:#fff; }
+    .row { display:flex; gap:10px; }
+    .row input { flex:1; padding:10px 12px; border:1px solid #bfcdc4; border-radius:8px; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:8px;
+           text-decoration:none; background:#0d4221; color:#fff; border:0; }
+  </style>
+
+  <div class="login-wrap">
+    <div class="login-title">관리자 로그인</div>
+    <div class="login-box">
+      <form method="POST" action="{{ url_for('admin_login', next=request.args.get('next')) }}">
+        <div class="row">
+          <input type="password" name="password" placeholder="비밀번호" required>
+          <button type="submit" class="btn">로그인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

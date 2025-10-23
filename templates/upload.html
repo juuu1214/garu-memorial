@@ -2,38 +2,37 @@
 {% block content %}
 
 <div class="container-narrow">
-  <div class="flex items-center w-full relative bg-grey-pearl py-6" style="background:#f3f5f4;border-radius:12px;">
-    <a href="{{ url_for('index') }}" class="absolute" style="left:20px;top:50%;transform:translateY(-50%);text-decoration:none;color:inherit;" aria-label="뒤로가기">‹</a>
-    <div class="w-full text-[17px] font-bold center">사진 업로드</div>
+  <div class="topbar">
+    <img class="logo-green" src="/static/logo.svg" alt="logo">
   </div>
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="mt-3" style="color:#0d4221;">
-        {% for msg in messages %}
-          <div>{{ msg }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+  <style>
+    .up-wrap { max-width:520px; margin:0 auto; padding:20px; }
+    .up-title { font-size:18px; font-weight:700; margin-bottom:12px; }
+    .up-box {
+      border:1px dashed #bfd1c7; border-radius:12px; padding:20px;
+      background:#f7faf8;
+    }
+    .up-row { margin-top:10px; display:flex; gap:10px; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:8px;
+           text-decoration:none; background:#0d4221; color:#fff; border:0; }
+    .btn.ghost { background:#fff; color:#0d4221; border:1px solid #0d4221; }
+    .hint { color:#5c6d66; font-size:13px; margin-top:8px; }
+  </style>
 
-  <form class="w-full max-w-[480px] mt-[15px] mx-auto px-[20px] lg:px-0"
-        method="POST" action="{{ url_for('gallery_upload') }}" enctype="multipart/form-data">
-    <div class="flex flex-col gap-3">
-      <label for="photo" class="text-[15px]">이미지 선택 (1:1 권장)</label>
-      <input id="photo" name="photo" type="file" accept="image/*" required
-             class="ant-input ant-input-outlined input font-normal text-[14px]"
-             style="border:1px solid #bfcdc4;border-radius:8px;padding:10px 12px;" />
+  <div class="up-wrap">
+    <div class="up-title">사진 업로드 (관리자)</div>
+    <div class="up-box">
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('gallery_upload') }}">
+        <input type="file" name="photo" accept=".png,.jpg,.jpeg,.gif,.webp" required>
+        <div class="hint">* 10MB 이하 / png, jpg, jpeg, gif, webp</div>
+        <div class="up-row">
+          <button type="submit" class="btn">업로드</button>
+          <a href="{{ url_for('gallery') }}" class="btn ghost">사진첩으로</a>
+        </div>
+      </form>
     </div>
-
-    <div class="flex gap-3">
-      <button type="submit" class="btn-primary-obituary mt-[20px]"
-              style="width:100%;border-radius:10px;padding:12px 16px;">
-        업로드
-      </button>
-    </div>
-    <p class="mt-2 text-[13px]" style="color:#666;">* 업로드 후 메인으로 이동합니다.</p>
-  </form>
+  </div>
 </div>
 
 {% endblock %}

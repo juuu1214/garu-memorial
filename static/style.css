@@ -63,6 +63,28 @@
   display: block;
 }
 
+/* === 전역 버튼 스타일 === */
+.btn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #cfd8d3;
+  border-radius: 999px;
+  font-size: 13px;
+  background: #fff;
+  text-decoration: none;
+  color: #0f1a14;
+  transition: all 0.2s ease;
+}
+.btn-chip:hover {
+  background: #cfd8d3;
+  color: #fff;
+}
+.btn-chip:active {
+  transform: translateY(1px);
+}
+
 /* 슬라이드 네비 버튼 */
 .btn-slick {
   position: absolute;
