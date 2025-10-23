@@ -1,160 +1,140 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, flash
-import datetime, os, json, uuid, hashlib
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
+import datetime, os, json
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "change-me"  # flash 메시지용. 환경변수로 빼도 됨.
+app.secret_key = "change-me"  # flash 메시지 용. 원하면 변경하세요.
 
+# ===== 경로/설정 =====
 DATA_DIR = "data"
 DATA_FILE = os.path.join(DATA_DIR, "guestbook.json")
-LEGACY_COUNT = 14  # 하드코딩된 예전 방명록 개수
+LEGACY_COUNT = 14
 
+STATIC_DIR = "static"
+UPLOAD_DIR = os.path.join(STATIC_DIR, "uploads")   # 업로드 저장 폴더
+GALLERY_DIR = os.path.join(STATIC_DIR, "gallery")  # 초기 샘플 사진 폴더(없어도 OK)
+
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+# GALLERY_DIR은 있으면 사용
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB
+
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ===== 방명록 유틸 =====
 def load_guestbook():
     if not os.path.exists(DATA_FILE):
         return []
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            return json.load(f)
     except Exception:
-        data = []
-
-    # 마이그레이션: id 없는 기존 항목에 id 부여
-    changed = False
-    for item in data:
-        if "id" not in item:
-            item["id"] = uuid.uuid4().hex
-            changed = True
-    if changed:
-        save_guestbook(data)
-    return data
+        return []
 
 def save_guestbook(data):
-    os.makedirs(DATA_DIR, exist_ok=True)
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-def hash_pw(pw: str) -> str:
-    # 빈 문자열은 저장하지 않음
-    return hashlib.sha256(pw.encode("utf-8")).hexdigest()
+# ===== 이미지 수집 유틸 =====
+def list_images_from(dir_path: str, web_prefix: str):
+    """
+    dir_path의 이미지를 허용 확장자만 모아 최신 수정시간 내림차순으로 정렬.
+    템플릿에서 바로 <img src>로 쓸 수 있게 web 경로(/static/...)를 넣어 반환.
+    """
+    if not os.path.isdir(dir_path):
+        return []
+    items = []
+    for name in os.listdir(dir_path):
+        path = os.path.join(dir_path, name)
+        if not os.path.isfile(path):
+            continue
+        if not allowed_file(name):
+            continue
+        try:
+            mtime = os.path.getmtime(path)
+        except OSError:
+            mtime = 0
+        items.append({
+            "url": f"/{web_prefix.strip('/')}/{name}",  # 예: /static/uploads/xxx.jpg
+            "mtime": mtime,
+            "name": name,
+        })
+    items.sort(key=lambda x: x["mtime"], reverse=True)
+    # 템플릿에선 url만 쓰니 url 리스트로 변경
+    return [x["url"] for x in items]
 
-def find_entry(data, entry_id):
-    for i, item in enumerate(data):
-        if item.get("id") == entry_id:
-            return i, item
-    return None, None
-
-@app.route('/')
+# ===== 라우팅 =====
+@app.route("/")
 def index():
     gb = load_guestbook()
-    return render_template('index.html', guestbook=gb)
+    return render_template("index.html", guestbook=gb)
 
-@app.route('/guest-list', endpoint='guest_list')
+@app.route("/guest-list", endpoint="guest_list")
 def guest_list():
     gb = load_guestbook()
     total_count = len(gb) + LEGACY_COUNT
-    return render_template('guest_list.html', guestbook=gb, total_count=total_count)
+    return render_template("guest_list.html", guestbook=gb, total_count=total_count)
 
-@app.route('/write', methods=['POST'], endpoint='write')
+@app.route("/guest/create", methods=["GET"], endpoint="guest_create")
+def guest_create():
+    return render_template("guest_create.html")
+
+@app.route("/write", methods=["POST"])
 def write():
-    name = request.form.get('name', '').strip()
-    message = request.form.get('message', '').strip()
-    pw = (request.form.get('password') or '').strip()
+    name = request.form.get("name", "").strip()
+    message = request.form.get("message", "").strip()
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
     if name and message:
         gb = load_guestbook()
-        entry = {
-            "id": uuid.uuid4().hex,
-            "name": name,
-            "message": message,
-            "date": date
-        }
-        if pw:
-            entry["password_hash"] = hash_pw(pw)
-        gb.insert(0, entry)  # 최신이 위로
+        gb.insert(0, {"name": name, "message": message, "date": date})
         save_guestbook(gb)
+    return redirect(url_for("guest_list"))
 
-    return redirect(url_for('guest_list'))
-
-@app.route('/guest/create', methods=['GET'], endpoint='guest_create')
-def guest_create():
-    return render_template('guest_create.html')
-
-# ====== 새로 추가: 편집 페이지, 수정, 삭제 ======
-
-@app.route('/guest/edit', methods=['GET'], endpoint='guest_edit')
-def guest_edit():
+# ===== 갤러리 페이지 =====
+@app.route("/gallery", endpoint="gallery")
+def gallery():
     """
-    예시 URL과 비슷하게 ?messageId=... 쿼리로 받는다.
-    (원하면 path 파라미터로 바꿔도 됨)
+    /static/uploads(업로드) + /static/gallery(샘플, 있을 때만)를 합쳐 최신순으로 보여줌.
     """
-    entry_id = request.args.get('messageId') or request.args.get('id')
-    if not entry_id:
-        abort(400, description="messageId가 없습니다.")
-    gb = load_guestbook()
-    _, entry = find_entry(gb, entry_id)
-    if not entry:
-        abort(404, description="해당 글을 찾을 수 없습니다.")
-    return render_template('guest_edit.html', entry=entry)
+    uploaded = list_images_from(UPLOAD_DIR, "static/uploads")
+    samples = list_images_from(GALLERY_DIR, "static/gallery")
+    images = uploaded + samples
+    return render_template("gallery.html", images=images)
 
-@app.route('/guest/update', methods=['POST'], endpoint='guest_update')
-def guest_update():
-    entry_id = request.form.get('id')
-    name = request.form.get('name', '').strip()
-    message = request.form.get('message', '').strip()
-    pw = (request.form.get('password') or '').strip()
+# ===== 업로드 (GET: 폼, POST: 저장) =====
+@app.route("/gallery/upload", methods=["GET", "POST"], endpoint="gallery_upload")
+def gallery_upload():
+    if request.method == "GET":
+        return render_template("upload.html")
 
-    gb = load_guestbook()
-    idx, entry = find_entry(gb, entry_id)
-    if entry is None:
-        abort(404, description="해당 글을 찾을 수 없습니다.")
+    file = request.files.get("photo")
+    if not file or file.filename == "":
+        flash("파일을 선택해 주세요.")
+        return redirect(url_for("gallery_upload"))
 
-    # 비밀번호 검증 (설정된 경우에만)
-    stored = entry.get('password_hash')
-    if stored:
-        if not pw or hash_pw(pw) != stored:
-            flash("비밀번호가 올바르지 않습니다.", "error")
-            return redirect(url_for('guest_edit', messageId=entry_id))
+    if not allowed_file(file.filename):
+        flash("허용되지 않는 파일 형식입니다. (png, jpg, jpeg, gif, webp)")
+        return redirect(url_for("gallery_upload"))
 
-    # 업데이트
-    if name:
-        entry['name'] = name
-    if message:
-        entry['message'] = message
-    entry['date'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")  # 수정시간으로 업데이트(선택)
-    gb[idx] = entry
-    save_guestbook(gb)
-    flash("수정되었습니다.", "success")
-    return redirect(url_for('guest_list'))
+    filename = secure_filename(file.filename)
+    ts = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+    name, ext = os.path.splitext(filename)
+    saved_name = f"{ts}_{name}{ext.lower()}"
+    file.save(os.path.join(UPLOAD_DIR, saved_name))
 
-@app.route('/guest/delete', methods=['POST'], endpoint='guest_delete')
-def guest_delete():
-    entry_id = request.form.get('id')
-    pw = (request.form.get('password') or '').strip()
+    flash("업로드 완료!")
+    return redirect(url_for("gallery"))
 
-    gb = load_guestbook()
-    idx, entry = find_entry(gb, entry_id)
-    if entry is None:
-        abort(404, description="해당 글을 찾을 수 없습니다.")
+# (선택) 업로드 파일 직접 서빙이 필요할 때만 사용
+# 현재는 /static/uploads 경로를 사용하므로 보통 필요 없음.
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
-    stored = entry.get('password_hash')
-    if stored:
-        if not pw or hash_pw(pw) != stored:
-            flash("비밀번호가 올바르지 않습니다.", "error")
-            return redirect(url_for('guest_edit', messageId=entry_id))
-
-    # 삭제
-    gb.pop(idx)
-    save_guestbook(gb)
-    flash("삭제되었습니다.", "success")
-    return redirect(url_for('guest_list'))
-
-# (디버그용 라우트는 필요시 유지)
-@app.route("/_routes")
-def _routes():
-    lines = []
-    for r in app.url_map.iter_rules():
-        lines.append(f"{r.endpoint:20s} {','.join(sorted(r.methods)):<20s} {r.rule}")
-    return "<pre>" + "\n".join(sorted(lines)) + "</pre>"
-
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # 개발 중이면 debug=True로 에러 상세 확인 가능
     app.run(debug=True, use_reloader=False)

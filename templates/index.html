@@ -7,228 +7,128 @@
   </div>
 
   <!-- ============ intro 영역 전체 (하루 1회 메시지, 꼬리 중앙, 점프 방지) ============ -->
-<style>
-  :root {
-    --avatar-size: 210px;
-  }
-  @media (max-width: 520px) {
-    :root {
-      --avatar-size: 180px;
+  <style>
+    :root { --avatar-size: 210px; }
+    @media (max-width: 520px) { :root { --avatar-size: 180px; } }
+
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      width: var(--avatar-size);
+      height: var(--avatar-size);
+      margin: 24px 0 16px;
     }
-  }
 
-  .avatar-wrap {
-    position: relative;
-    display: inline-block;
-    /* ✅ 이미지 로드 전에도 레이아웃 확정 */
-    width: var(--avatar-size);
-    height: var(--avatar-size);
-    margin: 24px 0 16px;
-  }
+    .avatar-circle {
+      width: var(--avatar-size);
+      height: var(--avatar-size);
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 22px rgba(0,0,0,.15);
+      border: 3px solid rgba(255,255,255,.95);
+      background:#fff;
+    }
+    .avatar-circle img { width:100%; height:100%; object-fit:cover; display:block; }
 
-  /* 🐾 원형 프로필 */
-  .avatar-circle {
-    width: var(--avatar-size);
-    height: var(--avatar-size);
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
-    border: 3px solid rgba(255, 255, 255, 0.95);
-    background: #fff;
-  }
-
-  .avatar-circle img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* 💬 사진 위 중앙, 위치는 transform으로 고정 */
-  .speech-bubble {
-    position: absolute;
-    bottom: calc(100% + 20px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    color: #0f1a14;
-    font-size: 15px;
-    line-height: 1.6;
-    padding: 10px 16px;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    display: inline-block;
-    overflow: visible;
-    z-index: 3;
-    /* ✅ 위치 튐 방지: transform 애니메이션 제거, opacity만 */
-    animation: bubble-fade 180ms ease-out;
-  }
-
-  /* 한 줄 말줄임은 내부 텍스트에만 적용 */
-  .speech-bubble .bubble-text {
-    display: inline-block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 90vw;
-    text-align: center;
-    vertical-align: top;
-  }
-
-  /* ✨ 꼬리 중앙 */
-  .speech-bubble::before,
-  .speech-bubble::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-  }
-  .speech-bubble::before {
-    bottom: -11px;
-    border-width: 11px 10px 0 10px;
-    border-color: rgba(0, 0, 0, 0.08) transparent transparent transparent;
-  }
-  .speech-bubble::after {
-    bottom: -10px;
-    border-width: 10px 9px 0 9px;
-    border-color: #ffffff transparent transparent transparent;
-  }
-
-  @keyframes bubble-fade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  @media (max-width: 520px) {
     .speech-bubble {
-      bottom: calc(100% + 14px);
-      font-size: 14px;
-      padding: 8px 12px;
+      position: absolute;
+      bottom: calc(100% + 20px);
+      left: 50%; transform: translateX(-50%);
+      background:#fff; color:#0f1a14;
+      font-size:15px; line-height:1.6;
+      padding:10px 16px; border-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,.12);
+      border:1px solid rgba(0,0,0,.08);
+      display:inline-block; overflow:visible; z-index:3;
+      animation: bubble-fade 180ms ease-out;
     }
     .speech-bubble .bubble-text {
-      max-width: 85vw;
+      display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 90vw; text-align:center; vertical-align:top;
     }
-  }
-</style>
+    .speech-bubble::before, .speech-bubble::after {
+      content:""; position:absolute; left:50%; transform:translateX(-50%);
+      width:0; height:0; border-style:solid;
+    }
+    .speech-bubble::before {
+      bottom:-11px; border-width:11px 10px 0 10px;
+      border-color: rgba(0,0,0,.08) transparent transparent transparent;
+    }
+    .speech-bubble::after {
+      bottom:-10px; border-width:10px 9px 0 9px;
+      border-color:#fff transparent transparent transparent;
+    }
+    @keyframes bubble-fade { from{opacity:0} to{opacity:1} }
 
-<div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
-  <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
-  <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
+    @media (max-width: 520px){
+      .speech-bubble { bottom: calc(100% + 14px); font-size:14px; padding:8px 12px; }
+      .speech-bubble .bubble-text { max-width: 85vw; }
+    }
 
-  <!-- 🐾 아바타 + 말풍선 -->
-  <div class="avatar-wrap">
-    <div class="speech-bubble" id="garuBubble">
-      <span class="bubble-text">오늘도 나 생각했지? ☁️</span>
-    </div>
-    <div class="avatar-circle">
-      <!-- ✅ width/height로 공간 예약 -->
-      <img src="/static/garu-main.jpg" alt="가루 프로필 사진" width="210" height="210" />
-    </div>
-  </div>
+    /* 인트로 버튼 그룹 */
+    .intro-cta {
+      display:flex; gap:12px; justify-content:center; margin:22px 0 8px;
+      flex-wrap:wrap;
+    }
+    .cta-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:12px 18px; border-radius:999px; font-size:15px; font-weight:600;
+      border:1px solid #0d4221; color:#0d4221; background:#fff;
+      text-decoration:none; transition: transform .06s ease, box-shadow .2s;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .cta-btn.primary {
+      background:#0d4221; color:#fff; border-color:#0d4221;
+    }
+    .cta-btn:hover { transform: translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.08); }
+  </style>
 
-  <div class="intro-name">가루 프랭키 아이반호 멍키</div>
-  <div class="intro-date-wrap">
-    <div class="intro-date">2025년 09월 22일</div>
-  </div>
-</div>
+  <div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
+    <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
+    <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
 
-<script>
-  /* 💬 랜덤 메시지 (하루 1회 변경) */
-  const garuMessages = [
-    "오늘도 나 생각했지? ☁️",
-    "하늘에서도 너 보고 있다멍 🐾",
-    "항상 고마워, 내 친구 💚",
-    "오늘 하루도 힘내라멍 🌿",
-    "나 잊지 말고 가끔 놀러와줘 ☁️",
-    "나도 너 보고 싶다멍 💭",
-    "기억 속에서도 함께 산책하자멍 🌈",
-    "내가 먼저 갔지만 언제나 곁에 있을게 💫",
-  ];
-
-  const bubbleText = document.querySelector("#garuBubble .bubble-text");
-  if (bubbleText) {
-    const today = new Date();
-    const dayKey = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-    const idx = dayKey % garuMessages.length;
-    bubbleText.textContent = garuMessages[idx];
-  }
-</script>
-<!-- ============ /intro 영역 전체 ============ -->
-
-  <div class="mx20">
-    <div class="center mt24">
-      <button class="btn-rounded">영원히 기억할게</button>
-    </div>
-
-    <!-- 슬라이더 #1 -->
-    <div class="slider-block">
-      <div class="slick-page" id="pageA">1/9</div>
-
-      <!-- ◀ 이전 버튼 (오른쪽 버튼과 동일 스타일/동작) -->
-      <button class="btn-slick left" data-target="A" aria-label="prev">‹</button>
-
-      <div class="slick-list">
-        <div class="slick-track" id="trackA">
-          <div class="slick-slide"><img src="/static/gallery/01.jpg" alt="garu-1" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/02.jpg" alt="garu-2" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/03.jpg" alt="garu-3" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/04.jpg" alt="garu-4" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/05.jpg" alt="garu-5" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/06.jpg" alt="garu-6" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/07.jpg" alt="garu-7" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/08.jpg" alt="garu-8" class="slide-img"></div>
-          <div class="slick-slide"><img src="/static/gallery/09.jpg" alt="garu-9" class="slide-img"></div>
-        </div>
+    <!-- 🐾 아바타 + 말풍선 -->
+    <div class="avatar-wrap">
+      <div class="speech-bubble" id="garuBubble">
+        <span class="bubble-text">오늘도 나 생각했지? ☁️</span>
       </div>
-
-      <!-- ▶ 다음 버튼 (원래 있던 버튼) -->
-      <button class="btn-slick right" data-target="A" aria-label="next">›</button>
-    </div>
-
-    <div class="center mt25">
-      <div class="name-xl">가루 프랭키 아이반호 멍키</div>
-      <div class="age">18살</div>
-    </div>
-  </div>
-
-
-
-  <div class="center">
-    <div class="gb-eyebrow">하늘 위로 이사 왔다멍☁️<br>
-        나 잊지 말고 가끔 놀러와서 한마디 남겨줘멍🐾</div>
-
-    <div class="gb-for-row">
-      <div class="gb-for">For. <span>가루 프랭키 아이반호 멍키</span></div>
-      <a class="btn btn-ghost" href="/guest-list">전체보기 &gt;</a>
-    </div>
-
-<div class="guestbook-list">
-  <!-- 🆕 새로 작성된 방명록 -->
-  {% for msg in guestbook %}
-    <div class="gb-card">
-      <div class="gb-card-head">
-        <span>From. <span class="from-name">{{ msg.name }}</span></span>
-        <span class="date">{{ msg.date }}</span>
+      <div class="avatar-circle">
+        <img src="/static/garu-main.jpg" alt="가루 프로필 사진" width="210" height="210" />
       </div>
-      <div class="gb-card-body">{{ msg.message }}</div>
     </div>
-  {% endfor %}
 
-  <!-- 🕊️ 하드코딩된 예전 방명록 -->
-  {% include "_legacy.html" %}
+    <div class="intro-name">가루 프랭키 아이반호 멍키</div>
+    <div class="intro-date-wrap"><div class="intro-date">2025년 09월 22일</div></div>
 
-</div>
-
-    <a href="{{ url_for('guest_create') }}" class="btn-primary-obituary mt35">방명록 작성하기</a>
+    <!-- ✅ 인트로에서 이동 버튼 -->
+    <div class="intro-cta">
+      <a class="cta-btn primary" href="{{ url_for('gallery') }}">📸 사진첩</a>
+      <a class="cta-btn" href="{{ url_for('guest_list') }}">📝 방명록</a>
+    </div>
   </div>
-</div>
 
-<script src="/static/slider.js"></script>
+  <script>
+    /* 💬 랜덤 메시지 (하루 1회 변경) */
+    const garuMessages = [
+      "오늘도 나 생각했지? ☁️",
+      "하늘에서도 너 보고 있다멍 🐾",
+      "항상 고마워, 내 친구 💚",
+      "오늘 하루도 힘내라멍 🌿",
+      "나 잊지 말고 가끔 놀러와줘 ☁️",
+      "나도 너 보고 싶다멍 💭",
+      "기억 속에서도 함께 산책하자멍 🌈",
+      "내가 먼저 갔지만 언제나 곁에 있을게 💫",
+    ];
+    const bubbleText = document.querySelector("#garuBubble .bubble-text");
+    if (bubbleText) {
+      const today = new Date();
+      const dayKey = today.getFullYear()*10000 + (today.getMonth()+1)*100 + today.getDate();
+      const idx = dayKey % garuMessages.length;
+      bubbleText.textContent = garuMessages[idx];
+    }
+  </script>
+  <!-- ============ /intro 영역 전체 ============ -->
+
+</div>
 {% endblock %}
