@@ -1,0 +1,151 @@
+/* 기본 레이아웃 */
+.container-narrow { max-width: 480px; margin: 20px auto 120px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; padding: 0 20px; }
+.logo-green { height: 40px; }
+
+/* 인트로 */
+.intro-section {
+  min-height: 700px;
+  display:flex; flex-direction:column; align-items:center;
+  padding: 35px 12px 40px;
+  background-size: contain; background-repeat: no-repeat;
+  position: relative; border-radius: 16px;
+}
+.leaf-top { position:absolute; right:0; top:0; width:40%; }
+.leaf-bot { position:absolute; left:0; bottom:0; width:150px; }
+.intro-eyebrow { font-size:12px; font-weight:500; }
+.intro-subtitle { margin-top:10px; font-size:16px; font-weight:500; text-align:center; }
+.portrait-frame {
+  width:247px; height:339px; margin-top:34px;
+  border:1.5px solid #69B77A; /* green-main 비슷 */
+  border-top-left-radius:166px; border-top-right-radius:166px;
+  border-bottom-left-radius:0; border-bottom-right-radius:0;
+  background-size: cover; background-position: center; background-repeat:no-repeat;
+}
+.intro-name { margin-top:24px; font-size:37px; font-weight:800; color:#000; text-align:center; }
+.intro-date-wrap { margin-top:46px; text-align:center; }
+.intro-date { font-size:20px; font-weight:800; color:#6b7280; }
+.intro-desc { font-size:18px; font-weight:600; color:#6b7280; }
+
+/* 버튼/텍스트 유틸 */
+.mx20 { margin: 0 20px; }
+.center { text-align:center; }
+.mt24 { margin-top:24px; }
+.mt25 { margin-top:25px; }
+.mt20 { margin-top:20px; }
+.mt35 { display:inline-block; margin-top:35px; }
+.mt60 { margin-top:60px; }
+.text18 { font-size:18px; }
+.bold { font-weight:700; }
+.underline { text-decoration: underline; }
+
+.btn-rounded {
+  display:inline-block; padding:6px 20px; border-radius:9999px;
+  background:#e6f4ea; color:#111; border:1px solid #cce7d3; cursor:pointer;
+}
+.btn-green { background:#2f9e44; color:#fff; border:none; }
+
+/* 이름/나이 */
+.name-xl { font-size:31px; font-weight:800; }
+.age { font-size:20px; }
+
+/* 슬라이더 공통 */
+.slider-block { position:relative; margin-top:22px; }
+.slick-page {
+  position: absolute;
+  bottom: 10px;       /* 사진 아래에서 조금 위로 */
+  right: 15px;        /* 오른쪽 여백 */
+  background: rgba(0, 0, 0, 0.5);  /* 반투명 배경 */
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(4px);
+  z-index: 3;
+}
+.slick-list { overflow:hidden; border-radius:12px; }
+.slick-track { display:flex; transition: transform 0.35s ease; }
+.slick-slide { width: 440px; flex: 0 0 440px; padding: 0; }
+.slide-img {
+  width: 100%;
+  aspect-ratio: 3 / 4;   /* 3:4 비율 유지 */
+  object-fit: cover;      /* 이미지가 프레임을 가득 채우도록 */
+  border-radius: 12px;
+  display: block;
+}
+
+/* 슬라이드 네비 버튼 */
+.btn-slick {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #333;
+  font-size: 22px;
+  font-weight: 600;
+
+  /* 🧭 아이콘 정중앙 맞춤 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+  z-index: 5;
+}
+
+.btn-slick:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.btn-slick.left { left: 8px; }
+.btn-slick.right { right: 8px; }
+
+
+
+/* 방명록 헤더 배경 */
+.guestbook-hero {
+  height:100px; width:100%;
+  background-size:cover; background-repeat:no-repeat; background-position:center;
+  border-radius:12px; margin:90px 0 24px;
+}
+
+/* 방명록 */
+.gb-eyebrow { font-size:16px; font-weight:600; }
+.gb-title { font-size:20px; font-weight:800; }
+.gb-for-row {
+  position:relative; display:flex; align-items:center; justify-content:center;
+  margin:30px 0 15px; width:100%;
+}
+.gb-for { font-size:20px; font-weight:600; color:#2f9e44; }
+.gb-for span { font-size:27px; font-weight:800; }
+.btn.btn-ghost {
+  position:absolute; right:0; transform: translateY(0);
+  font-size:12px; padding:0 6px; height:30px; line-height:30px;
+  border:1px solid #333; border-radius:6px; color:#000;
+}
+.guestbook-list { max-height:800px; overflow:auto; width:100%; }
+.gb-card {
+  margin-bottom:16px; border:1px solid #c0c0c0; border-radius:10px; padding: 20px 20px 15px;
+  color:#6b7280; font-size:15px;
+}
+.gb-card-head { display:flex; align-items:center; justify-content:space-between; }
+.from-name { color:#111; font-weight:700; margin-left:4px; }
+.date { font-size:12px; }
+.gb-card-body { margin-top:7px; color:#6b7280; white-space:pre-line; }
+
+.btn-primary-obituary {
+  display:inline-block; background:#2f9e44; color:#fff; padding:12px 18px;
+  border-radius:10px; text-decoration:none;
+}
+

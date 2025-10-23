@@ -1,0 +1,68 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<div class="container-narrow">
+  <!-- 상단 헤더 -->
+  <div class="flex items-center w-full relative bg-grey-pearl py-6" style="background:#f3f5f4;border-radius:12px;">
+    <a href="{{ url_for('guest_list') }}" class="absolute" style="left:20px;top:50%;transform:translateY(-50%);text-decoration:none;color:inherit;" aria-label="뒤로가기">
+      ‹
+    </a>
+    <div class="w-full text-[17px] font-bold center">방명록 작성</div>
+  </div>
+
+  <!-- 폼 -->
+  <form class="w-full max-w-[480px] mt-[15px] mx-auto px-[20px] lg:px-0"
+        method="POST"
+        action="{{ url_for('write') }}">
+    <!-- 작성자 -->
+    <div class="flex items-center gap-3">
+      <label for="name" class="text-[15px]" style="min-width:64px;">작성자</label>
+      <input id="name" name="name" type="text" required
+             placeholder="이름을 입력 해주세요."
+             class="ant-input ant-input-outlined input font-normal text-[14px] flex-1"
+             style="border:1px solid #bfcdc4;border-radius:8px;padding:10px 12px;" />
+    </div>
+
+    <!-- 내용 -->
+    <div class="relative mt-2.5 w-full h-[300px] rounded-lg overflow-hidden p-[20px_20px_30px]"
+         style="border:1px solid #bfcdc4;">
+      <textarea id="message" name="message" maxlength="2000" required
+                placeholder="가루에게 전하고 싶은 말을 적어주세요."
+                class="ant-input ant-input-outlined"
+                style="width:100%;height:100%;border:0;outline:none;resize:none;"></textarea>
+      <span id="charCount" class="absolute right-3 bottom-3">0/2000</span>
+    </div>
+
+    <!-- 비밀번호(옵션) -->
+    <div class="flex items-center gap-3 mt-2.5">
+      <label for="pw" class="text-[15px]" style="min-width:64px;">비밀번호</label>
+      <input id="pw" name="password" type="password"
+             placeholder="방명록 삭제/수정 시 필요합니다. (선택)"
+             class="ant-input ant-input-outlined input font-normal text-[14px] flex-1"
+             style="border:1px solid #bfcdc4;border-radius:8px;padding:10px 12px;" />
+    </div>
+
+    <!-- 버튼 -->
+    <div class="flex gap-3">
+      <button type="submit" class="btn-primary-obituary mt-[35px]"
+              style="width:100%;border-radius:10px;padding:12px 16px;">
+        방명록 등록하기
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- 글자 수 카운터 -->
+<script>
+  (function(){
+    const ta = document.getElementById('message');
+    const counter = document.getElementById('charCount');
+    if (ta && counter) {
+      const update = () => { counter.textContent = (ta.value || '').length + '/2000'; };
+      ta.addEventListener('input', update);
+      update();
+    }
+  })();
+</script>
+
+{% endblock %}

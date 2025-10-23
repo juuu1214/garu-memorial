@@ -1,0 +1,30 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="container-narrow center">
+  <div class="topbar">
+    <a href="/" class="btn btn-ghost" aria-label="back">←</a>
+    <div class="title-green">기억의 숲, 방명록</div>
+  </div>
+
+  <p class="subtitle-gray">소중한 마음들이 모여있는 곳입니다.</p>
+
+  <div class="list-head">
+    <span class="text-[14px] font-semibold">전체 {{ total_count }}건</span>
+    <a href="/guest-list#create" class="btn-primary-obituary">방명록 작성</a>
+  </div>
+
+  <div class="guestbook-list mt15">
+    {% for msg in guestbook %}
+      <div class="gb-card">
+        <div class="gb-card-head">
+          <span>From. <span class="from-name">{{ msg.name }}</span></span>
+          <span class="date">{{ msg.date }}</span>
+        </div>
+        <div class="gb-card-body">{{ msg.message }}</div>
+      </div>
+    {% endfor %}
+
+    {% include "_legacy.html" %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<div class="container-narrow">
+  <div class="topbar">
+    <img class="logo-green" src="/static/logo.svg" alt="logo">
+  </div>
+
+  <div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
+    <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
+    <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
+
+    <div class="intro-eyebrow">반려동물 부고</div>
+    <p class="intro-subtitle">저의 소중한 가족이 <br> 먼저 긴 여행을 떠났습니다.</p>
+
+    <div class="portrait-frame" style="background-image:url('/static/garu-main.jpg');"></div>
+
+    <div class="intro-name">가루 프랭키 아이반호 멍키</div>
+    <div class="intro-date-wrap">
+      <div class="intro-date">2025년 09월 22일</div>
+      <p class="intro-desc">
+        무지개다리를 건넌 가루 프랭키 아이반호 멍키의<br>
+        명복을 빌며 함께 기억해주세요.
+      </p>
+    </div>
+  </div>
+
+  <div class="mx20">
+    <div class="center mt24">
+      <button class="btn-rounded">영원히 기억할게</button>
+    </div>
+
+    <!-- 슬라이더 #1 -->
+    <div class="slider-block">
+      <div class="slick-page" id="pageA">1/9</div>
+
+      <!-- ◀ 이전 버튼 (오른쪽 버튼과 동일 스타일/동작) -->
+      <button class="btn-slick left" data-target="A" aria-label="prev">‹</button>
+
+      <div class="slick-list">
+        <div class="slick-track" id="trackA">
+          <div class="slick-slide"><img src="/static/gallery/01.jpg" alt="garu-1" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/02.jpg" alt="garu-2" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/03.jpg" alt="garu-3" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/04.jpg" alt="garu-4" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/05.jpg" alt="garu-5" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/06.jpg" alt="garu-6" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/07.jpg" alt="garu-7" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/08.jpg" alt="garu-8" class="slide-img"></div>
+          <div class="slick-slide"><img src="/static/gallery/09.jpg" alt="garu-9" class="slide-img"></div>
+        </div>
+      </div>
+
+      <!-- ▶ 다음 버튼 (원래 있던 버튼) -->
+      <button class="btn-slick right" data-target="A" aria-label="next">›</button>
+    </div>
+
+    <div class="center mt25">
+      <div class="name-xl">가루 프랭키 아이반호 멍키</div>
+      <div class="age">18살</div>
+    </div>
+  </div>
+
+
+
+  <div class="center">
+    <div class="gb-eyebrow">기억의 숲, 방명록</div>
+    <div class="gb-title">조문글을 남겨 주세요</div>
+
+    <div class="gb-for-row">
+      <div class="gb-for">For. <span>가루 프랭키 아이반호 멍키</span></div>
+      <a class="btn btn-ghost" href="/guest-list">전체보기 &gt;</a>
+    </div>
+
+<div class="guestbook-list">
+  <!-- 🆕 새로 작성된 방명록 -->
+  {% for msg in guestbook %}
+    <div class="gb-card">
+      <div class="gb-card-head">
+        <span>From. <span class="from-name">{{ msg.name }}</span></span>
+        <span class="date">{{ msg.date }}</span>
+      </div>
+      <div class="gb-card-body">{{ msg.message }}</div>
+    </div>
+  {% endfor %}
+
+  <!-- 🕊️ 하드코딩된 예전 방명록 -->
+  {% include "_legacy.html" %}
+
+</div>
+
+    <a href="{{ url_for('guest_create') }}" class="btn-primary-obituary mt35">방명록 작성하기</a>
+  </div>
+</div>
+
+<script src="/static/slider.js"></script>
+{% endblock %}
