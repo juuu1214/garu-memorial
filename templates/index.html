@@ -6,24 +6,161 @@
     <img class="logo-green" src="/static/logo.svg" alt="logo">
   </div>
 
-  <div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
-    <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
-    <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
+  <!-- ============ intro 영역 전체 (하루 1회 메시지, 꼬리 중앙, 점프 방지) ============ -->
+<style>
+  :root {
+    --avatar-size: 210px;
+  }
+  @media (max-width: 520px) {
+    :root {
+      --avatar-size: 180px;
+    }
+  }
 
-    <div class="intro-eyebrow">반려동물 부고</div>
-    <p class="intro-subtitle">저의 소중한 가족이 <br> 먼저 긴 여행을 떠났습니다.</p>
+  .avatar-wrap {
+    position: relative;
+    display: inline-block;
+    /* ✅ 이미지 로드 전에도 레이아웃 확정 */
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    margin: 24px 0 16px;
+  }
 
-    <div class="portrait-frame" style="background-image:url('/static/garu-main.jpg');"></div>
+  /* 🐾 원형 프로필 */
+  .avatar-circle {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.95);
+    background: #fff;
+  }
 
-    <div class="intro-name">가루 프랭키 아이반호 멍키</div>
-    <div class="intro-date-wrap">
-      <div class="intro-date">2025년 09월 22일</div>
-      <p class="intro-desc">
-        무지개다리를 건넌 가루 프랭키 아이반호 멍키의<br>
-        명복을 빌며 함께 기억해주세요.
-      </p>
+  .avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 💬 사진 위 중앙, 위치는 transform으로 고정 */
+  .speech-bubble {
+    position: absolute;
+    bottom: calc(100% + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    color: #0f1a14;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 10px 16px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: inline-block;
+    overflow: visible;
+    z-index: 3;
+    /* ✅ 위치 튐 방지: transform 애니메이션 제거, opacity만 */
+    animation: bubble-fade 180ms ease-out;
+  }
+
+  /* 한 줄 말줄임은 내부 텍스트에만 적용 */
+  .speech-bubble .bubble-text {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90vw;
+    text-align: center;
+    vertical-align: top;
+  }
+
+  /* ✨ 꼬리 중앙 */
+  .speech-bubble::before,
+  .speech-bubble::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+  }
+  .speech-bubble::before {
+    bottom: -11px;
+    border-width: 11px 10px 0 10px;
+    border-color: rgba(0, 0, 0, 0.08) transparent transparent transparent;
+  }
+  .speech-bubble::after {
+    bottom: -10px;
+    border-width: 10px 9px 0 9px;
+    border-color: #ffffff transparent transparent transparent;
+  }
+
+  @keyframes bubble-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @media (max-width: 520px) {
+    .speech-bubble {
+      bottom: calc(100% + 14px);
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+    .speech-bubble .bubble-text {
+      max-width: 85vw;
+    }
+  }
+</style>
+
+<div class="intro-section" style="background-image:url('/static/waving-leaves.gif');">
+  <img class="leaf-top" src="/static/leaf-top.png" alt="leaf-top">
+  <img class="leaf-bot" src="/static/leaf-bot.png" alt="leaf-bottom">
+
+  <!-- 🐾 아바타 + 말풍선 -->
+  <div class="avatar-wrap">
+    <div class="speech-bubble" id="garuBubble">
+      <span class="bubble-text">오늘도 나 생각했지? ☁️</span>
+    </div>
+    <div class="avatar-circle">
+      <!-- ✅ width/height로 공간 예약 -->
+      <img src="/static/garu-main.jpg" alt="가루 프로필 사진" width="210" height="210" />
     </div>
   </div>
+
+  <div class="intro-name">가루 프랭키 아이반호 멍키</div>
+  <div class="intro-date-wrap">
+    <div class="intro-date">2025년 09월 22일</div>
+  </div>
+</div>
+
+<script>
+  /* 💬 랜덤 메시지 (하루 1회 변경) */
+  const garuMessages = [
+    "오늘도 나 생각했지? ☁️",
+    "하늘에서도 너 보고 있다멍 🐾",
+    "항상 고마워, 내 친구 💚",
+    "오늘 하루도 힘내라멍 🌿",
+    "나 잊지 말고 가끔 놀러와줘 ☁️",
+    "나도 너 보고 싶다멍 💭",
+    "기억 속에서도 함께 산책하자멍 🌈",
+    "내가 먼저 갔지만 언제나 곁에 있을게 💫",
+  ];
+
+  const bubbleText = document.querySelector("#garuBubble .bubble-text");
+  if (bubbleText) {
+    const today = new Date();
+    const dayKey = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    const idx = dayKey % garuMessages.length;
+    bubbleText.textContent = garuMessages[idx];
+  }
+</script>
+<!-- ============ /intro 영역 전체 ============ -->
 
   <div class="mx20">
     <div class="center mt24">
@@ -64,8 +201,8 @@
 
 
   <div class="center">
-    <div class="gb-eyebrow">기억의 숲, 방명록</div>
-    <div class="gb-title">조문글을 남겨 주세요</div>
+    <div class="gb-eyebrow">하늘 위로 이사 왔다멍☁️<br>
+        나 잊지 말고 가끔 놀러와서 한마디 남겨줘멍🐾</div>
 
     <div class="gb-for-row">
       <div class="gb-for">For. <span>가루 프랭키 아이반호 멍키</span></div>

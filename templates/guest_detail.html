@@ -1,0 +1,67 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<div class="container-narrow">
+  <!-- 상단 헤더 -->
+  <div class="flex items-center w-full relative" style="background:#f3f5f4;border-radius:12px;padding:16px;">
+    <a href="{{ url_for('guest_list') }}" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);text-decoration:none;" aria-label="뒤로가기">‹</a>
+    <div class="w-full center" style="font-weight:700;">방명록 상세 / 수정 · 삭제</div>
+  </div>
+
+  <!-- 수정 폼 -->
+  <form class="w-100 mt20" method="POST" action="{{ url_for('guest_edit', entry_id=entry.id) }}">
+    <!-- 작성자 -->
+    <div class="flex items-center gap-12">
+      <label for="name" style="min-width:64px;">작성자</label>
+      <input id="name" name="name" type="text" required
+             value="{{ entry.name }}"
+             style="border:1px solid #bfcdc4;border-radius:8px;padding:10px 12px;flex:1;" />
+    </div>
+
+    <!-- 내용 -->
+    <div class="mt10" style="position:relative;border:1px solid #bfcdc4;border-radius:8px;overflow:hidden;">
+      <textarea id="message" name="message" maxlength="2000" required
+                style="width:100%;height:260px;border:0;outline:none;resize:none;padding:12px;">{{ entry.message }}</textarea>
+      <span id="charCount" style="position:absolute;right:10px;bottom:8px;color:#6b7280;"></span>
+    </div>
+
+    <!-- 비밀번호 확인 -->
+    <div class="flex items-center gap-12 mt10">
+      <label for="pw" style="min-width:64px;">비밀번호</label>
+      <input id="pw" name="password" type="password" required
+             placeholder="수정/삭제 시 필요합니다."
+             style="border:1px solid #bfcdc4;border-radius:8px;padding:10px 12px;flex:1;" />
+    </div>
+
+    <div class="flex gap-12">
+      <button type="submit" class="btn-primary-obituary mt35" style="flex:1;">수정</button>
+      <!-- 삭제는 별도 폼(POST) -->
+      <form method="POST" action="{{ url_for('guest_delete', entry_id=entry.id) }}" style="flex:1;">
+        <input type="hidden" name="password" id="delete_pw_proxy">
+        <button type="submit" class="btn-primary-obituary btn-outlined-obituary mt35" style="width:100%;">삭제</button>
+      </form>
+    </div>
+  </form>
+</div>
+
+<script>
+  // 글자 수 카운트 & 삭제 시 같은 비번 전달
+  (function () {
+    const ta = document.getElementById('message');
+    const counter = document.getElementById('charCount');
+    if (ta && counter) {
+      const update = () => { counter.textContent = (ta.value || '').length + '/2000'; };
+      ta.addEventListener('input', update); update();
+    }
+
+    // 삭제 버튼 누를 때 수정 비밀번호 입력칸의 값을 삭제폼 hidden으로 복사
+    const pw = document.getElementById('pw');
+    const delPw = document.getElementById('delete_pw_proxy');
+    if (pw && delPw) {
+      pw.addEventListener('input', () => delPw.value = pw.value);
+      delPw.value = pw.value;
+    }
+  })();
+</script>
+
+{% endblock %}
