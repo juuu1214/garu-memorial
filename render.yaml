@@ -4,20 +4,17 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn main:app --bind 0.0.0.0:$PORT
     autoDeploy: true
-envVars:
-  - key: FLASK_ENV
-    value: production
-  - key: UPLOAD_DIR
-    value: uploads           # (로컬 임시 사용 가능)
-  - key: SUPABASE_URL
-    sync: false              # Render 대시보드에서 값 넣기
-  - key: SUPABASE_ANON_KEY
-    sync: false              # Render 대시보드에서 값 넣기
-  - key: SUPABASE_BUCKET
-    value: garu              # 위에서 만든 버킷명
-  - key: SUPABASE_PUBLIC    # public 버킷이면 true
-    value: "true"
 
-        
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: UPLOAD_DIR
+        value: uploads          # 필요 없지만 남겨둬도 무방
+      - key: SUPABASE_URL
+        sync: false             # Render 대시보드에 직접 입력
+      - key: SUPABASE_ANON_KEY
+        sync: false             # Render 대시보드에 직접 입력
+      - key: SECRET_KEY
+        value: garu-secret      # 또는 Render 대시보드에서 설정
