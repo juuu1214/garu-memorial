@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for
 from supabase import create_client
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo  # Python 3.9+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-me")  # 환경변수로 바꿔 쓰는 걸 권장
@@ -41,16 +43,26 @@ def db_insert_guestbook(name: str, message: str):
 def normalize_rows(rows):
     """
     템플릿 호환을 위해 DB 로우를 {name, message, date} 형태로 변환
-    created_at(ISO) → 'YYYY-MM-DD HH:MM' 문자열
+    created_at(UTC ISO) → KST(Asia/Seoul) 'YYYY-MM-DD HH:MM'
     """
+    kst = ZoneInfo("Asia/Seoul")
     out = []
     for r in rows:
         iso = r.get("created_at") or ""
-        date = ""
-        if isinstance(iso, str) and "T" in iso:
-            # 예: 2025-10-24T09:15:00Z → 2025-10-24 09:15
-            date = iso.replace("T", " ")[:16].replace("Z", "")
-        out.append({"name": r.get("name", ""), "message": r.get("message", ""), "date": date})
+        date_str = ""
+        try:
+            # 'Z'를 +00:00으로 치환해 tz-aware UTC로 파싱
+            dt_utc = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+            dt_kst = dt_utc.astimezone(kst)
+            date_str = dt_kst.strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            # 파싱 실패 시 최소한의 포맷으로 표시
+            date_str = iso.replace("T", " ").replace("Z", "")[:16]
+        out.append({
+            "name": r.get("name", ""),
+            "message": r.get("message", ""),
+            "date": date_str,
+        })
     return out
 
 # ===== 정적 갤러리 유틸 =====
