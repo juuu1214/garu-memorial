@@ -1,7 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
 
-<div class="container-narrow">
+<div class="container-narrow" style="margin-top:60px;">  {# ⬅ 여유 공간 추가 #}
   <div class="mx20">
 
   <style>
@@ -10,7 +10,8 @@
       display:flex; align-items:center; justify-content:space-between;
       padding: 12px 18px;
     }
-    .ig-title { font-size:18px; font-weight:700; }
+    .ig-title { font-size:18px; font-weight:700; display:flex; align-items:baseline; gap:8px; }
+    .ig-count { font-size:12px; font-weight:600; color:#6b7d74; }
     .btn-chip {
       display:inline-flex; align-items:center; gap:6px;
       padding:8px 12px; border:1px solid #cfd8d3; border-radius:999px;
@@ -38,15 +39,6 @@
       display: block;
     }
 
-    /* 삭제 버튼 (관리자 전용) */
-    .ig-del {
-      position:absolute; top:8px; right:8px;
-      background: rgba(0,0,0,0.5); color:#fff; border:0;
-      border-radius: 999px; padding: 6px 10px; font-size:12px;
-      cursor:pointer;
-    }
-    .ig-del:hover { background: rgba(0,0,0,0.7); }
-
     .ig-empty {
       text-align:center; color:#486055;
       background:#f5f7f6; border-radius:12px;
@@ -60,17 +52,14 @@
 
   <div class="ig-wrap">
     <div class="ig-head">
-      <div class="ig-title">가루스타그램</div>
+      <div class="ig-title">
+        가루스타그램
+        <span class="ig-count">({{ images|length if images else 0 }}/12)</span>
+      </div>
       <div class="ig-actions">
-        {% if is_admin %}
-          <a class="btn-chip" href="{{ url_for('gallery_upload') }}">📤 사진 올리기</a>
-          <a class="btn-chip" href="{{ url_for('admin_logout') }}">🔒 로그아웃</a>
-        {% else %}
-          <a class="btn-chip" href="{{ url_for('index') }}">🏠 메인</a>
-          <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록</a>
-        {% endif %}
-        
-
+        <a class="btn-chip" href="{{ url_for('index') }}">🏠 메인</a>
+        <a class="btn-chip" href="{{ url_for('guest_list') }}">📝 방명록</a>
+        {# 관리자 페이지는 별도이므로 로그인/업로드/로그아웃 버튼 제거 #}
       </div>
     </div>
 
@@ -79,23 +68,14 @@
         {% for img in images %}
           <div class="ig-item">
             <img src="{{ img.url }}" alt="추억 사진" loading="lazy">
-            {% if is_admin and img.origin == 'static/uploads' %}
-              <form method="POST" action="{{ url_for('gallery_delete') }}">
-                <input type="hidden" name="filename" value="{{ img.name }}">
-                <button type="submit" class="ig-del" title="삭제">✕</button>
-              </form>
-            {% endif %}
+            {# 삭제 버튼(관리자 전용) 제거됨 #}
           </div>
         {% endfor %}
       </div>
     {% else %}
       <div class="ig-empty">
         아직 사진이 없어요.<br>
-        {% if is_admin %}
-          <a class="btn-chip mt8" href="{{ url_for('gallery_upload') }}">📤 첫 사진 올리기</a>
-        {% else %}
-          <a class="btn-chip mt8" href="{{ url_for('admin_login', next=url_for('gallery')) }}">🔓 관리자 로그인</a>
-        {% endif %}
+        <span style="font-size:12px; opacity:.8;">최대 12장까지 전시됩니다.</span>
       </div>
     {% endif %}
   </div>
