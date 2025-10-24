@@ -1,82 +1,100 @@
-# main.py — 관리자/업로드 제거, Supabase 방명록 + 정적 갤러리(최대 12장)
+# main.py — Supabase 연동 + 방명록 + 정적 갤러리 (진단 로그 포함)
 import os
 from pathlib import Path
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request, redirect, url_for
 from supabase import create_client
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo  # Python 3.9+
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "change-me")  # 환경변수로 바꿔 쓰는 걸 권장
+app.secret_key = os.environ.get("SECRET_KEY", "change-me")
 
 # ===== Supabase 설정 =====
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-# 서버 전용이면 SERVICE_ROLE 키 추천(노출 주의). 없으면 ANON 키 사용.
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ["SUPABASE_ANON_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = (
+    os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    or os.environ.get("SUPABASE_ANON_KEY")
+)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("⚠️  Supabase 환경변수 누락: SUPABASE_URL / SUPABASE_ANON_KEY 확인 필요")
+
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ===== 경로/상수 =====
 BASE_DIR = Path(__file__).parent.resolve()
 STATIC_DIR = BASE_DIR / "static"
-GALLERY_DIR = STATIC_DIR / "gallery"             # 정적 갤러리 폴더
-MAIN_PHOTO_PATH = STATIC_DIR / "garu-main.jpg"   # 메인 대표 이미지 (정적 교체)
+GALLERY_DIR = STATIC_DIR / "gallery"
+MAIN_PHOTO_PATH = STATIC_DIR / "garu-main.jpg"
 
 MAX_IMAGES = 12
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
-LEGACY_COUNT = 14  # 기존 방명록 개수 가산용(필요 없으면 0으로)
+LEGACY_COUNT = 14
 
-# ===== 방명록(DB) 유틸 =====
+# ===== 방명록 DB 유틸 =====
 def db_list_guestbook(limit: int = 200):
-    """Supabase guestbook 테이블에서 최신순 조회"""
-    res = (
-        supabase.table("guestbook")
-        .select("*")
-        .order("created_at", desc=True)
-        .limit(limit)
-        .execute()
-    )
-    return res.data or []
+    """Supabase guestbook 테이블에서 최신순 조회(+진단 로그)"""
+    try:
+        res = (
+            supabase.table("guestbook")
+            .select("id,name,message,created_at")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        rows = res.data or []
+        print(f"[DB][LIST] ok rows={len(rows)} first={rows[0] if rows else None}")
+        return rows
+    except Exception as e:
+        print("[DB][LIST][ERR]", repr(e))
+        return []
+
 
 def db_insert_guestbook(name: str, message: str):
-    supabase.table("guestbook").insert({"name": name, "message": message}).execute()
+    try:
+        supabase.table("guestbook").insert({"name": name, "message": message}).execute()
+        print("[DB][INSERT] ok:", {"name": name, "len": len(message)})
+    except Exception as e:
+        print("[DB][INSERT][ERR]", repr(e))
+        raise
+
 
 def normalize_rows(rows):
-    """
-    템플릿 호환을 위해 DB 로우를 {name, message, date} 형태로 변환
-    created_at(UTC ISO) → KST(Asia/Seoul) 'YYYY-MM-DD HH:MM'
-    """
+    """created_at(UTC ISO) → KST 'YYYY-MM-DD HH:MM'"""
     kst = ZoneInfo("Asia/Seoul")
     out = []
     for r in rows:
         iso = r.get("created_at") or ""
         date_str = ""
         try:
-            # 'Z'를 +00:00으로 치환해 tz-aware UTC로 파싱
             dt_utc = datetime.fromisoformat(iso.replace("Z", "+00:00"))
             dt_kst = dt_utc.astimezone(kst)
             date_str = dt_kst.strftime("%Y-%m-%d %H:%M")
         except Exception:
-            # 파싱 실패 시 최소한의 포맷으로 표시
             date_str = iso.replace("T", " ").replace("Z", "")[:16]
-        out.append({
-            "name": r.get("name", ""),
-            "message": r.get("message", ""),
-            "date": date_str,
-        })
+        out.append(
+            {
+                "name": r.get("name", ""),
+                "message": r.get("message", ""),
+                "date": date_str,
+            }
+        )
     return out
 
-# ===== 정적 갤러리 유틸 =====
+
+# ===== 갤러리 =====
 def get_gallery_images():
-    """static/gallery/ 에 있는 이미지들만 읽어 최대 12장 전시"""
+    """static/gallery/ 내 이미지 최대 12장"""
     if not GALLERY_DIR.is_dir():
         return []
     files = [
-        p.name for p in sorted(GALLERY_DIR.glob("*"))
+        p.name
+        for p in sorted(GALLERY_DIR.glob("*"))
         if p.is_file() and p.suffix.lower() in ALLOWED_EXTENSIONS
     ][:MAX_IMAGES]
     return [{"url": url_for("static", filename=f"gallery/{name}"), "name": name} for name in files]
 
-# ===== 메인 이미지 캐시버스터(선택) =====
+
+# ===== 캐시버스터 =====
 @app.context_processor
 def inject_versions():
     def ver_static(rel_path: str):
@@ -85,15 +103,17 @@ def inject_versions():
             return int(p.stat().st_mtime)
         except Exception:
             return 0
+
     return {"ver_static": ver_static}
+
 
 # ===== 페이지 =====
 @app.route("/")
 def index():
     gb_rows = db_list_guestbook()
     gb = normalize_rows(gb_rows)
-    # 템플릿에서: {{ url_for('static', filename='garu-main.jpg') }}?v={{ ver_static('garu-main.jpg') }}
     return render_template("index.html", guestbook=gb)
+
 
 @app.route("/guest-list", endpoint="guest_list")
 def guest_list():
@@ -102,23 +122,61 @@ def guest_list():
     total_count = len(gb) + LEGACY_COUNT
     return render_template("guest_list.html", guestbook=gb, total_count=total_count)
 
+
 @app.route("/guest/create", methods=["GET"], endpoint="guest_create")
 def guest_create():
     return render_template("guest_create.html")
+
 
 @app.route("/write", methods=["POST"])
 def write():
     name = request.form.get("name", "").strip()
     message = request.form.get("message", "").strip()
+    print("[WRITE] name:", name, "len(message):", len(message))
     if name and message:
-        db_insert_guestbook(name, message)
+        try:
+            db_insert_guestbook(name, message)
+        except Exception as e:
+            print("[WRITE][ERR]", repr(e))
     return redirect(url_for("guest_list"))
+
 
 @app.route("/gallery", endpoint="gallery")
 def gallery():
     images = get_gallery_images()
     return render_template("gallery.html", images=images)
 
-# ===== 개발용 실행 =====
+
+# ===== 진단용 엔드포인트 =====
+@app.get("/_debug")
+def _debug():
+    """환경변수/권한/행 수 빠른 점검"""
+    ok_url = bool(os.environ.get("SUPABASE_URL"))
+    ok_key = bool(
+        os.environ.get("SUPABASE_ANON_KEY")
+        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    )
+    status = {"ok_url": ok_url, "ok_key": ok_key}
+    try:
+        res = supabase.table("guestbook").select("id", count="exact").limit(1).execute()
+        status["db"] = "ok"
+        status["count"] = getattr(res, "count", None)
+    except Exception as e:
+        status["db"] = "error"
+        status["error"] = str(e)
+    return status, (200 if status.get("db") == "ok" else 500)
+
+
+@app.post("/_seed")
+def _seed():
+    """서버에서 직접 1행 넣어보기 (권한/정책 검증)"""
+    try:
+        db_insert_guestbook("서버테스트", "서버에서 직접 넣은 행")
+        return {"ok": True}, 200
+    except Exception as e:
+        return {"ok": False, "error": str(e)}, 500
+
+
+# ===== 개발용 =====
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
