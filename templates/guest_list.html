@@ -58,6 +58,12 @@
 
     <div class="divider"></div>
 
+    <div style="background:#fff3cd;border:1px solid #ffe08a;color:#664d03;border-radius:8px;padding:8px 10px;margin:8px 0;">
+  debug → guestbook length: {{ guestbook|length }} |
+  first: {{ guestbook[0].name if guestbook else 'none' }} /
+  {{ guestbook[0].date if guestbook else '' }}
+</div>
+
     <div class="gb-list">
       {% for msg in guestbook %}
         <div class="gb-card">
@@ -65,7 +71,7 @@
             <span>From. <b>{{ msg.name }}</b></span>
             <span class="date">{{ msg.date }}</span>
           </div>
-          <div class="gb-card-body">{{ msg.message | trim }}</div>
+          <div class="gb-card-body">{{ msg.message | e | trim }}</div>
         </div>
       {% endfor %}
 

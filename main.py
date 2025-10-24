@@ -176,6 +176,12 @@ def _seed():
     except Exception as e:
         return {"ok": False, "error": str(e)}, 500
 
+@app.after_request
+def add_no_cache_headers(resp):
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 # ===== 개발용 =====
 if __name__ == "__main__":
