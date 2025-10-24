@@ -20,6 +20,19 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# --- Supabase 연결 정보 로깅 ---
+def _log_supa_boot():
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_ANON_KEY") or ""
+    try:
+        host = url.split("//", 1)[1].split("/", 1)[0]
+    except Exception:
+        host = url or "(no-url)"
+    masked = (key[:6] + "..." + key[-4:]) if key else "(no-key)"
+    print(f"[SUPA][BOOT] host={host} key={masked}")
+
+_log_supa_boot()
+
 # ===== 경로/상수 =====
 BASE_DIR = Path(__file__).parent.resolve()
 STATIC_DIR = BASE_DIR / "static"
@@ -34,6 +47,7 @@ LEGACY_COUNT = 14
 def db_list_guestbook(limit: int = 200):
     """Supabase guestbook 테이블에서 최신순 조회(+진단 로그)"""
     try:
+        print(f"[SUPA][SELECT] table=guestbook limit={limit} order=created_at desc")
         res = (
             supabase.table("guestbook")
             .select("id,name,message,created_at")
@@ -42,19 +56,20 @@ def db_list_guestbook(limit: int = 200):
             .execute()
         )
         rows = res.data or []
-        print(f"[DB][LIST] ok rows={len(rows)} first={rows[0] if rows else None}")
+        print(f"[SUPA][SELECT][OK] rows={len(rows)} first={rows[0] if rows else None}")
         return rows
     except Exception as e:
-        print("[DB][LIST][ERR]", repr(e))
+        print("[SUPA][SELECT][ERR]", repr(e))
         return []
 
 
 def db_insert_guestbook(name: str, message: str):
     try:
+        print(f"[SUPA][INSERT] table=guestbook name={name!r} len(message)={len(message)}")
         supabase.table("guestbook").insert({"name": name, "message": message}).execute()
-        print("[DB][INSERT] ok:", {"name": name, "len": len(message)})
+        print("[SUPA][INSERT][OK]")
     except Exception as e:
-        print("[DB][INSERT][ERR]", repr(e))
+        print("[SUPA][INSERT][ERR]", repr(e))
         raise
 
 
@@ -138,6 +153,8 @@ def write():
             db_insert_guestbook(name, message)
         except Exception as e:
             print("[WRITE][ERR]", repr(e))
+    # 조회까지 따라가서 리스트 로그 확인
+    _ = db_list_guestbook(limit=1)
     return redirect(url_for("guest_list"))
 
 
@@ -182,6 +199,25 @@ def add_no_cache_headers(resp):
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
     return resp
+
+@app.get("/_debug_plus")
+def _debug_plus():
+    url = os.environ.get("SUPABASE_URL", "")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_ANON_KEY") or ""
+    try:
+        host = url.split("//", 1)[1].split("/", 1)[0]
+    except Exception:
+        host = url or "(no-url)"
+    masked = (key[:6] + "..." + key[-4:]) if key else "(no-key)"
+    status = {"host": host, "key_prefix": masked}
+    try:
+        res = supabase.table("guestbook").select("id", count="exact").limit(1).execute()
+        status["db"] = "ok"
+        status["count"] = getattr(res, "count", None)
+    except Exception as e:
+        status["db"] = "error"
+        status["error"] = str(e)
+    return status, (200 if status.get("db") == "ok" else 500)
 
 # ===== 개발용 =====
 if __name__ == "__main__":
