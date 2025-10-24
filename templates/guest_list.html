@@ -1,7 +1,7 @@
 {% extends "_base.html" %}
 {% block content %}
 
-<div class="container-narrow">  {# ⬅ 여유 공간 추가 #}
+<div class="container-narrow">
   <div class="mx20">
 
     <style>
@@ -15,9 +15,9 @@
 
       /* ✅ 갤러리와 동일한 버튼 스타일 */
       .btn-chip {
-      display:inline-flex; align-items:center; gap:6px;
-      padding:8px 12px; border:1px solid #cfd8d3; border-radius:999px;
-      font-size:13px; background:#fff; text-decoration:none; color:#0f1a14;
+        display:inline-flex; align-items:center; gap:6px;
+        padding:8px 12px; border:1px solid #cfd8d3; border-radius:999px;
+        font-size:13px; background:#fff; text-decoration:none; color:#0f1a14;
       }
       .btn-chip:hover { background:#cfd8d3; color:#fff; }
       .btn-chip:active { transform:translateY(1px); }
@@ -33,7 +33,6 @@
       .gb-card-head {
         display:flex; justify-content:space-between; gap:8px; font-size:14px;
       }
-      /* ✅ 이름색 통일 (회색 → 검정) */
       .gb-card-head b,
       .gb-card-head .from-name {
         color:#000; font-weight:600;
@@ -48,7 +47,7 @@
     <div class="gb-head">
       <div class="gb-title">
         방명록
-      <small>(총 {{ total_count }}개)</small>
+        <small>(총 {{ total_count }}개)</small>
       </div>
       <div class="gb-actions">
         <a class="btn-chip" href="{{ url_for('guest_create') }}">📝 방명록 작성</a>
@@ -57,12 +56,6 @@
     </div>
 
     <div class="divider"></div>
-
-    <div style="background:#fff3cd;border:1px solid #ffe08a;color:#664d03;border-radius:8px;padding:8px 10px;margin:8px 0;">
-  debug → guestbook length: {{ guestbook|length }} |
-  first: {{ guestbook[0].name if guestbook else 'none' }} /
-  {{ guestbook[0].date if guestbook else '' }}
-</div>
 
     <div class="gb-list">
       {% for msg in guestbook %}
