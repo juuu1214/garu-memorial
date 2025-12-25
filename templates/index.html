@@ -205,39 +205,45 @@
     </div>
   </div>
 
-  <script>
-    /* 💬 하루 1회 랜덤 메시지 */
-    const garuMessages = [
-      "오늘도 나 생각했지? ☁️",
-      "하늘에서도 너 보고 있다멍 🐾",
-      "항상 고마워, 내 친구 💚",
-      "오늘 하루도 힘내라멍 🌿",
-      "나 잊지 말고 가끔 놀러와줘 ☁️",
-      "나도 너 보고 싶다멍 💭",
-      "기억 속에서도 함께 산책하자멍 🌈",
-      "내가 먼저 갔지만 언제나 곁에 있을게 💫",
+<script>
+  const garuMessages = [
+    "오늘도 나 생각했지? ☁️",
+    "하늘에서도 너 보고 있다멍 🐾",
+    "항상 고마워, 내 친구 💚",
+    "오늘 하루도 힘내라멍 🌿",
+    "나 잊지 말고 가끔 놀러와줘 ☁️",
+    "나도 너 보고 싶다멍 💭",
+    "기억 속에서도 함께 산책하자멍 🌈",
+    "내가 먼저 갔지만 언제나 곁에 있을게 💫",
+    "너 웃는 얼굴이 제일 좋아멍 🌼",
+    "오늘 구름색, 내 털 색 같지 않아? ☁️",
+    "네가 행복하면 나도 좋아멍 🐶",
+    "잠깐 하늘에 있을 뿐이야, 금방 또 만나멍 🌈",
+    "내 이름 부를 때마다 구름이 반짝일 거야 ☁️",
+    "산책 가는 꿈에서 만나자멍 🌙",
+    "내가 네 곁을 떠난 게 아니라, 마음 속으로 이사 간 거야 💭",
+    "오늘도 하늘에서 꼬리 흔드는 중이야 🐕✨",
+    "너의 하루가 따뜻하길, 내 털처럼 🤍",
+    "사랑해, 그 말은 언제나 유효하다멍 💌",
+    "가끔 하늘 보고 웃어줘, 나도 웃을게 ☁️"
+  ];
 
-      // 🌤 새로운 메시지
-      "너 웃는 얼굴이 제일 좋아멍 🌼",
-      "오늘 구름색, 내 털 색 같지 않아? ☁️",
-      "네가 행복하면 나도 좋아멍 🐶",
-      "잠깐 하늘에 있을 뿐이야, 금방 또 만나멍 🌈",
-      "내 이름 부를 때마다 구름이 반짝일 거야 ☁️",
-      "산책 가는 꿈에서 만나자멍 🌙",
-      "내가 네 곁을 떠난 게 아니라, 마음 속으로 이사 간 거야 💭",
-      "오늘도 하늘에서 꼬리 흔드는 중이야 🐕✨",
-      "너의 하루가 따뜻하길, 내 털처럼 🤍",
-      "사랑해, 그 말은 언제나 유효하다멍 💌",
-      "가끔 하늘 보고 웃어줘, 나도 웃을게 ☁️"
-    ];
-    const bubbleText = document.querySelector("#garuBubble .bubble-text");
-    if (bubbleText) {
-      const today = new Date();
-      const dayKey = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const bubbleText = document.querySelector("#garuBubble .bubble-text");
+  if (bubbleText) {
+    const today = new Date();
+    const m = today.getMonth() + 1; // 1~12
+    const d = today.getDate();      // 1~31
+
+    // ✅ 오늘만(12/25) 고정
+    if (m === 12 && d === 25) {
+      bubbleText.textContent = "메리 크리스마스 🎄✨";
+    } else {
+      const dayKey = today.getFullYear() * 10000 + m * 100 + d;
       const idx = dayKey % garuMessages.length;
       bubbleText.textContent = garuMessages[idx];
     }
-  </script>
+  }
+</script>
 </div>
 
 {% endblock %}

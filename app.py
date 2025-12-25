@@ -43,10 +43,6 @@ def gallery():
 # def guest_list():
 #     return render_template("guest_list.html")
 
-@app.get("/ping")
-def ping():
-    return "ok", 200
-
 # ----------------------------
 # 개발용 실행
 # ----------------------------
