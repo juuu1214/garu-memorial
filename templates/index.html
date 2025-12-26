@@ -234,9 +234,9 @@
     const m = today.getMonth() + 1; // 1~12
     const d = today.getDate();      // 1~31
 
-    // ✅ 오늘만(12/25) 고정
-    if (m === 12 && d === 25) {
-      bubbleText.textContent = "메리 크리스마스 🎄✨";
+    // ✅ 새해만(1/1) 고정
+    if (m === 1 && d === 1) {
+      bubbleText.textContent = "새해 복 많이 받아라멍 🤍";
     } else {
       const dayKey = today.getFullYear() * 10000 + m * 100 + d;
       const idx = dayKey % garuMessages.length;
